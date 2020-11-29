@@ -1,0 +1,40 @@
+INFO "general"
+
+SET t-QR            "{ 'state': '{{ session.state }}' }"
+SET t-START         "{ 'state': '{{ session.state }}', 'video': '{{ url_for('download_file', filename='lorem.mp4') }}' }"
+SET t-CHOOSE_ARTIST "{ 'state': '{{ session.state }}' }"
+SET t-CHOOSE_ITEM   "{ 'state': '{{ session.state }}' }"
+SET t-REVIEW        "{ 'state': '{{ session.state }}' }"
+SET t-ASK_EXCHANGE  "{ 'state': '{{ session.state }}' }"
+SET t-GET_OFFER     "{ 'state': '{{ session.state }}' }"
+SET t-AI            "{ 'state': '{{ session.state }}' }"
+SET t-ACCEPTED      "{ 'state': '{{ session.state }}' }"
+SET t-REJECTED      "{ 'state': '{{ session.state }}' }"
+SET t-RETRY         "{ 'state': '{{ session.state }}' }"
+SET t-GET_OFFER2    "{ 'state': '{{ session.state }}' }"
+SET t-AI2           "{ 'state': '{{ session.state }}' }"
+SET t-REJECTED2     "{ 'state': '{{ session.state }}' }"
+SET t-GUIDED        "{ 'state': '{{ session.state }}' }"
+SET t-COLLECT       "{ 'state': '{{ session.state }}' }"
+SET t-NOW           "{ 'state': '{{ session.state }}' }"
+SET t-LATER         "{ 'state': '{{ session.state }}' }"
+SET t-DELIVER       "{ 'state': '{{ session.state }}' }"
+SET t-END           "{ 'state': '{{ session.state }}' }"
+
+INFO "########## artists ##########"
+SET artist-count 2
+HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "http://example.com/awesome.jpg" avatar "http://example.com/awesome-avi.jpg" video-intro "http://example.com/awesome.mp4" classifier "http://example.com/ai/awesome"
+HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "http://example.com/talented.jpg" avatar "http://example.com/talented-avi.jpg" video-intro "http://example.com/talented.mp4" classifier "http://example.com/ai/talented"
+
+INFO "########## items ##########"
+
+SET item-count 4
+HSET i-0 name "nice poem" artist 0 description "poem blob" photo "http://example.com/talented/poem.jpg" delivery "http://example.com/talented/poem.mp4" classifier-id 0
+HSET i-1 name "nice map" artist 0 description "map blob" photo "http://example.com/awesome/map.jpg" delivery "http://example.com/awesome/map.mp4" classifier-id 1
+SADD a-0-items 0 1
+HSET i-2 name "pretty installation" artist 1 description "pretty blob" photo "http://example.com/talented/installation.jpg" delivery "http://example.com/talented/installation.mp4" classifier-id 0
+HSET i-3 name "pretty song" artist 1 description "song blob" photo "http://example.com/talented/song.jpg" delivery "http://example.com/talented/song.mp4" classifier-id 1
+SADD a-1-items 2 3
+SET session-count 0
+SET event-count 0
+

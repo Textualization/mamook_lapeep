@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>Type code for access:</p>
+<form action="{{ url_for('landing') }}" method="get">
+  <input type="text" name="nonce"></input>
+  <input type="submit">
+</form>
+
+{% endblock %}
