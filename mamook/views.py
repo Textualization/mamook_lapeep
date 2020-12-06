@@ -3,10 +3,11 @@ import json
 import tempfile
 import io
 import smtplib
+import datetime
 from email.message import EmailMessage
 from functools import wraps
 
-from flask import render_template, flash, abort, redirect, session, url_for, request, g, jsonify, make_response, send_from_directory, render_template, render_template_string
+from flask import render_template, flash, abort, redirect, session, url_for, request, g, jsonify, make_response, send_from_directory, render_template, render_template_string, Response
 
 from mamook import app, redis_client
 from .model import MamookSession, create_session
@@ -72,7 +73,11 @@ def payload(nonce=None, session_id=None):
     session  = MamookSession(session_id, redis_client)
     print(session_id, session.state)
     template = redis_client.get("t-" + session.state).decode('utf-8')
-    resp     = render_template_string(template, session=session)
+    slots    = json.loads(redis_client.get("t-{}-slots".format(session.state)).decode('utf-8'))
+    filled_slots = { "session" : session }
+    for slot in slots:
+        filled_slots.update( session.slot(slot) )
+    resp     = render_template_string(template, **filled_slots)
     print(resp)
     return resp
 
@@ -81,15 +86,17 @@ def payload(nonce=None, session_id=None):
 def event(nonce=None, session_id=None):
     evt = request.json
     session  = MamookSession(session_id, redis_client)
-    print(evt['event'], session.state)
-    session.trigger(evt['event'])
+    print(evt, session.state)
+    session.trigger(evt['event'], evt.get('value', None))
     print(session.state)
     session.store()
     return "OK"
 
 @app.route('/<ui>.js', methods=['GET'])
 def js(ui):
-    return render_template("base.js", ui=ui)
+    resp = Response(render_template("base.js", ui=ui), content_type="application/javascript")
+    resp.headers.add('Expires', datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S GMT"))
+    return resp
 
 @app.route('/manual', methods=['GET'])
 def manual():

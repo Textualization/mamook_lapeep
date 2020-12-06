@@ -130,7 +130,22 @@ class MamookSession(object):
         else:
             mapping['received'] = self.received
         self.redis.hset(self.key, mapping=mapping)
-        
+
+    def slot(self, slot):
+        if slot == "artists":
+            artist_count = int(self.redis.get("artist-count"))
+            artists = []
+            for idx in range(0, artist_count):
+                artists.append(decode_dict(self.redis.hgetall("a-{}".format(idx))))
+            return { slot: artists }
+        return {}
+            
+
+def decode_dict(d):
+    r = {}
+    for k, v in d.items():
+        r[k.decode('utf-8')] = v.decode('utf-8')
+    return r
 
 def create_session(redis):
     _id   = int(MamookSession(None, redis)._id)

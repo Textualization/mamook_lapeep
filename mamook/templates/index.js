@@ -14,7 +14,15 @@ var mamook_handler = {
     document.getElementById("video").play();
     document.getElementById("video").onended = function(){
       mamook_event({ 'event' : "finishedvideo" });
-    }
-  }
-}
+    };
+  },
 
+  CHOOSE_ARTIST : function(payload) {
+    var html = '<h1>Please choose an artist to trade with</h1><ol>';
+    for( var idx=0; idx<payload.artists.length; idx++){
+        html += '<li>' + payload.artists[idx].name + ' <img src="' + payload.artists[idx].photo +'"></li>';
+    }
+    html += '</ol>';
+    document.getElementById("workarea").innerHTML = html;
+  }
+};
