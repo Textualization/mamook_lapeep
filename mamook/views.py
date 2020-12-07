@@ -71,9 +71,10 @@ def state(nonce=None, session_id=None):
 @nonce_required
 def payload(nonce=None, session_id=None):
     session  = MamookSession(session_id, redis_client)
-    print(session_id, session.state)
+    print(session_id, session.state, session.artist, session.item)
     template = redis_client.get("t-" + session.state).decode('utf-8')
     slots    = json.loads(redis_client.get("t-{}-slots".format(session.state)).decode('utf-8'))
+    print(slots)
     filled_slots = { "session" : session }
     for slot in slots:
         filled_slots.update( session.slot(slot) )

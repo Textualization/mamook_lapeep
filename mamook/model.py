@@ -32,13 +32,13 @@ class MamookSession(object):
         { 'trigger': 'scanned',       'source' : 'QR',               'dest' : 'START'           },
         { 'trigger': 'finishedvideo', 'source' : 'START',            'dest' : 'CHOOSE_ARTIST'   },
         { 'trigger': 'pick',          'source' : 'CHOOSE_ARTIST',    'dest' : 'CHOOSE_ITEM'     , 'before' : 'set_artist' },
-        { 'trigger': 'pick',          'source' : 'CHOOSE_ITEM',      'dest' : 'ASK_EXCHANGE'    , 'before' : 'set_item'   },
+        { 'trigger': 'pick',          'source' : 'CHOOSE_ITEM',      'dest' : 'REVIEW'          , 'before' : 'set_item'   },
         { 'trigger': 'goback',        'source' : 'CHOOSE_ITEM',      'dest' : 'CHOOSE_ARTIST'   },
-        { 'trigger': 'confirm',       'source' : 'CHOOSE_ITEM',      'dest' : 'ASKEXCHANGE'     },
+        { 'trigger': 'confirm',       'source' : 'REVIEW',           'dest' : 'ASK_EXCHANGE'     },
         { 'trigger': 'goback',        'source' : 'REVIEW',           'dest' : 'CHOOSE_ITEM'     },
         { 'trigger': 'goback',        'source' : 'ASK_EXCHANGE',     'dest' : 'REVIEW'          },
         { 'trigger': 'finishedvideo', 'source' : 'ASK_EXCHANGE',     'dest' : 'GET_OFFER'       },
-        { 'trigger': 'goback',        'source' : 'GET_OFFER'   ,     'dest' : 'REVIEW'          },
+        { 'trigger': 'goback',        'source' : 'GET_OFFER'   ,     'dest' : 'CHOOSE_ITEM'     },
         { 'trigger': 'offer',         'source' : 'GET_OFFER',        'dest' : 'AI'              , 'before' : 'set_offer' },
         { 'trigger': 'classifieryes', 'source' : 'AI',               'dest' : 'ACCEPTED'        },
         { 'trigger': 'classifierno',  'source' : 'AI',               'dest' : 'REJECTED'        },
@@ -138,8 +138,16 @@ class MamookSession(object):
             for idx in range(0, artist_count):
                 artists.append(decode_dict(self.redis.hgetall("a-{}".format(idx))))
             return { slot: artists }
+        elif slot == "artist":
+            return { slot : decode_dict(self.redis.hgetall("a-{}".format(self.artist))) }
+        elif slot == "item":
+            return { slot : decode_dict(self.redis.hgetall("i-{}".format(self.item))) }
+        elif slot == "items":
+            items = []
+            for idx in self.redis.smembers("a-{}-items".format(self.artist)):
+                items.append(decode_dict(self.redis.hgetall("i-{}".format(idx.decode("utf-8")))))
+            return { slot: items }
         return {}
-            
 
 def decode_dict(d):
     r = {}
