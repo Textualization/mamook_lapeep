@@ -4,7 +4,11 @@ var mamook_handler = {
   },
 
   START : function(payload) {
-     document.getElementById("workarea").innerHTML = "<p>Please watch the video.</p>";
+    document.getElementById("controlarea").innerHTML = "<p>Please watch the video.</p><button id='skip'>SKIP</button>";
+    document.getElementById("skip").onclick = function(evt) {
+      document.getElementById("skip").disabled = true;
+      disableAll(); mamook_event( { "event": "skip" } ); return true;
+    };
   },
 
   CHOOSE_ARTIST : function(payload) {
@@ -13,7 +17,7 @@ var mamook_handler = {
         html += '<li><button id="pick_' + idx + '">' + payload.artists[idx].name + '</button></li>';
     }
     html += '</ol>';
-    document.getElementById("workarea").innerHTML = html;
+    document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
         for( var idx=0; idx<payload.artists.length; idx++ ){
             document.getElementById("pick_" + idx).disabled = true;
@@ -34,7 +38,7 @@ var mamook_handler = {
     } 
     html += '<li><button id="goback">GO BACK</button></li>';
     html += '</ol>';
-    document.getElementById("workarea").innerHTML = html;
+    document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
         for( var idx=0; idx<payload.items.length; idx++ ){
             document.getElementById("pick_" + idx).disabled = true;
@@ -57,7 +61,7 @@ var mamook_handler = {
     html += '<li><button id="confirm">YES</button></li>';
     html += '<li><button id="goback">GO BACK</button></li>';
     html += '</ol>';
-    document.getElementById("workarea").innerHTML = html;
+    document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
         document.getElementById("confirm").disabled = true;
         document.getElementById("goback").disabled = true;
@@ -72,14 +76,19 @@ var mamook_handler = {
     
   ASK_EXCHANGE : function(payload) {
     var html = '<p>Please watch the video.</p><ol>';
+    html += '<li><button id="skip">SKIP</button></li>';
     html += '<li><button id="goback">GO BACK</button></li>';
     html += '</ol>';
-    document.getElementById("workarea").innerHTML = html;
+    document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
+        document.getElementById("skip").disabled = true;
         document.getElementById("goback").disabled = true;
     }
     document.getElementById("goback").onclick = function(evt) {
         disableAll(); mamook_event( { "event": "goback" } ); return true;
+    };
+    document.getElementById("skip").onclick = function(evt) {
+        disableAll(); mamook_event( { "event": "skip" } ); return true;
     };
   },
     
@@ -87,7 +96,7 @@ var mamook_handler = {
     var html = '<p>You offer: <input type"text" id="offered" name="offered"></input><br/>'+
         '<button id="offer">Make Offer</button><br/>'+
         '<button id="goback">GO BACK</button></p>';
-    document.getElementById("workarea").innerHTML = html;
+    document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
         document.getElementById("offer").disabled = true;
         document.getElementById("goback").disabled = true;

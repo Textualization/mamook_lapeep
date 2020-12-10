@@ -1,4 +1,6 @@
 import random
+import datetime
+import json
 
 from transitions import Machine
 from transitions.extensions.diagrams import GraphMachine
@@ -31,6 +33,7 @@ class MamookSession(object):
     transitions = [
         { 'trigger': 'scanned',       'source' : 'QR',               'dest' : 'START'           },
         { 'trigger': 'finishedvideo', 'source' : 'START',            'dest' : 'CHOOSE_ARTIST'   },
+        { 'trigger': 'skip',          'source' : 'START',            'dest' : 'CHOOSE_ARTIST'   },
         { 'trigger': 'pick',          'source' : 'CHOOSE_ARTIST',    'dest' : 'CHOOSE_ITEM'     , 'before' : 'set_artist' },
         { 'trigger': 'pick',          'source' : 'CHOOSE_ITEM',      'dest' : 'REVIEW'          , 'before' : 'set_item'   },
         { 'trigger': 'goback',        'source' : 'CHOOSE_ITEM',      'dest' : 'CHOOSE_ARTIST'   },
@@ -38,19 +41,23 @@ class MamookSession(object):
         { 'trigger': 'goback',        'source' : 'REVIEW',           'dest' : 'CHOOSE_ITEM'     },
         { 'trigger': 'goback',        'source' : 'ASK_EXCHANGE',     'dest' : 'REVIEW'          },
         { 'trigger': 'finishedvideo', 'source' : 'ASK_EXCHANGE',     'dest' : 'GET_OFFER'       },
+        { 'trigger': 'skip',          'source' : 'ASK_EXCHANGE',     'dest' : 'GET_OFFER'       },
         { 'trigger': 'goback',        'source' : 'GET_OFFER'   ,     'dest' : 'CHOOSE_ITEM'     },
         { 'trigger': 'offer',         'source' : 'GET_OFFER',        'dest' : 'AI'              , 'before' : 'set_offer' },
         { 'trigger': 'classifieryes', 'source' : 'AI',               'dest' : 'ACCEPTED'        },
         { 'trigger': 'classifierno',  'source' : 'AI',               'dest' : 'REJECTED'        },
         { 'trigger': 'finishvideo',   'source' : 'ACCEPTED',         'dest' : 'COLLECT'         },
+        { 'trigger': 'skip',          'source' : 'ACCEPTED',         'dest' : 'COLLECT'         },
         { 'trigger': 'goback',        'source' : 'REJECTED',         'dest' : 'RETRY'           },
         { 'trigger': 'restart',       'source' : 'REJECTED',         'dest' : 'CHOOSE_ARTIST'   },
         { 'trigger': 'help',          'source' : 'REJECTED',         'dest' : 'GUIDED'          },
         { 'trigger': 'finishedvideo', 'source' : 'RETRY',            'dest' : 'GET_OFFER2'      },
+        { 'trigger': 'skip',          'source' : 'RETRY',            'dest' : 'GET_OFFER2'      },
         { 'trigger': 'offer',         'source' : 'GET_OFFER2',       'dest' : 'AI2'             , 'before' : 'set_offer' },
         { 'trigger': 'classifieryes', 'source' : 'AI2',              'dest' : 'ACCEPTED'        },
         { 'trigger': 'classifierno',  'source' : 'AI2',              'dest' : 'REJECTED2'       },
         { 'trigger': 'finishedvideo', 'source' : 'REJECTED2',        'dest' : 'GUIDED'          },
+        { 'trigger': 'skip',          'source' : 'REJECTED2',        'dest' : 'GUIDED'          },
         { 'trigger': 'pick',          'source' : 'GUIDED',           'dest' : 'COLLECT'         , 'before' : 'set_offer' },
         { 'trigger': 'picknow',       'source' : 'COLLECT',          'dest' : 'NOW'             },
         { 'trigger': 'picklater',     'source' : 'COLLECT',          'dest' : 'LATER'           },
@@ -70,6 +77,7 @@ class MamookSession(object):
         self.item     = None
         self.offer    = None
         self.received = None
+        self.events   = 0
 
         self.machine = GraphMachine(model=self, states=MamookSession.states,
                                     transitions=MamookSession.transitions, initial='QR', title='Mamook Session')
@@ -101,7 +109,9 @@ class MamookSession(object):
         if self.redis.exists(self.key):
             self.machine.set_state(self.redis.hget(self.key, 'state').decode('utf-8'))
         else:
-            self.redis.hset(self.key, mapping={ "state": self.state })
+            self.redis.hset(self.key, mapping={ "state": self.state, "events" : 0 })
+        if self.redis.hexists(self.key, "events"):
+            self.artist = int(self.redis.hget(self.key, "events"))
         if self.redis.hexists(self.key, "artist"):
             self.artist = int(self.redis.hget(self.key, "artist"))
         if self.redis.hexists(self.key, "item"):
@@ -112,7 +122,7 @@ class MamookSession(object):
             self.received = self.redis.hget(self.key, "received").decode("utf-8")
 
     def store(self):
-        mapping = { "state": self.state }        
+        mapping = { "state": self.state, "events" : self.events }
         if self.artist is None:
             self.redis.hdel(self.key, "artist")
         else:
@@ -149,6 +159,12 @@ class MamookSession(object):
             return { slot: items }
         return {}
 
+    def record_event(self, evt):
+        self.events += 1
+        self.redis.hset(self.key, "events", self.events)
+        evt['datetime'] = datetime.datetime.now().ctime()
+        self.redis.set("e-{}-{}".format(self.key, self.events), json.dumps(evt))
+
 def decode_dict(d):
     r = {}
     for k, v in d.items():
@@ -161,4 +177,3 @@ def create_session(redis):
     redis.set("n-" + nonce, _id)
     
     return _id, nonce
-    

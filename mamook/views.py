@@ -87,6 +87,7 @@ def payload(nonce=None, session_id=None):
 def event(nonce=None, session_id=None):
     evt = request.json
     session  = MamookSession(session_id, redis_client)
+    session.record_event(evt)
     print(evt, session.state)
     session.trigger(evt['event'], evt.get('value', None))
     print(session.state)

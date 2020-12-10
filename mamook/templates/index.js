@@ -1,4 +1,3 @@
-var DEBUG=true;
 var mamook_handler = {
   QR : function(payload) {
     var url = "{{ url_for('landing', _external='true') }}";
@@ -9,16 +8,13 @@ var mamook_handler = {
   },
 
   START : function(payload) {
-    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240" muted="true"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>' + (DEBUG?"<button id='skip'>Skip</button>":"");
+    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>';
    // enabling audio will be a problem
     // https://stackoverflow.com/questions/49930680/how-to-handle-uncaught-in-promise-domexception-play-failed-because-the-use
     document.getElementById("video").play();
     document.getElementById("video").onended = function(){
       mamook_event({ 'event' : "finishedvideo" });
     };
-    if(DEBUG){
-          document.getElementById("skip").onclick = document.getElementById("video").onended;
-    }
   },
 
   CHOOSE_ARTIST : function(payload) {
@@ -47,7 +43,7 @@ var mamook_handler = {
   },
     
   ASK_EXCHANGE : function(payload) {
-    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240" muted="true"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>';
+    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>';
     document.getElementById("video").play();
     document.getElementById("video").onended = function(){
       mamook_event({ 'event' : "finishedvideo" });

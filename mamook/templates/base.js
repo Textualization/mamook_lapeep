@@ -58,4 +58,12 @@ window.mamook_check = function() {
   });
 }
 
+{% if ui == 'base' %}
+document.getElementById("workarea").innerHTML = "<button id='start'>START</button>";
+document.getElementById("start").onclick = function(evt) {
+  document.getElementById("workarea").innerHTML = "";
+  window.mamook_check();
+}
+{% else %}
 window.mamook_check();
+{% endif %}
