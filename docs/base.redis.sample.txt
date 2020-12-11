@@ -14,8 +14,8 @@ SET t-ASK_EXCHANGE        "{ 'state': '{{ session.state }}', 'video': '{{ artist
 SET t-ASK_EXCHANGE-slots  "[ \"artist\" ]"
 SET t-GET_OFFER           "{ 'state': '{{ session.state }}', 'item' : { 'name' : '{{ item.name|safe }}', 'photo' : '{{ item.name|safe }}' }, 'artist' : { 'name' : '{{ artist.name|safe }}', 'photo' : '{{ artist.name|safe }}' } }"
 SET t-GET_OFFER-slots     "[ \"item\", \"artist\" ]"
-SET t-AI                  "{ 'state': '{{ session.state }}' }"
-SET t-AI-slots            "[]"
+SET t-AI                  "{ 'state': '{{ session.state }}', 'item' : { 'id' : {{ item.id }} }, 'artist' : { 'id' : {{ artist.id }} }, 'classifier' : '{{ artist.classifier | safe }}', 'offer' : '{{ offer | safe }}' }"
+SET t-AI-slots            "[ \"item\", \"artist\", \"offer\" ]"
 SET t-ACCEPTED            "{ 'state': '{{ session.state }}' }"
 SET t-ACCEPTED-slots      "[]"
 SET t-REJECTED            "{ 'state': '{{ session.state }}' }"
@@ -43,8 +43,8 @@ SET t-END-slots           "[]"
 
 INFO "########## artists ##########"
 SET artist-count 2
-HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "http://example.com/awesome.jpg" avatar "http://example.com/awesome-avi.jpg" videointro "http://example.com/awesome.mp4" classifier "http://example.com/ai/awesome"
-HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "http://example.com/talented.jpg" avatar "http://example.com/talented-avi.jpg" videointro "http://example.com/talented.mp4" classifier "http://example.com/ai/talented"
+HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "http://example.com/awesome.jpg" avatar "http://example.com/awesome-avi.jpg" videointro "http://example.com/awesome.mp4" classifier "/classifier"
+HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "http://example.com/talented.jpg" avatar "http://example.com/talented-avi.jpg" videointro "http://example.com/talented.mp4" classifier "/classifier"
 
 INFO "########## items ##########"
 

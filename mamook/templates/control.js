@@ -6,8 +6,7 @@ var mamook_handler = {
   START : function(payload) {
     document.getElementById("controlarea").innerHTML = "<p>Please watch the video.</p><button id='skip'>SKIP</button>";
     document.getElementById("skip").onclick = function(evt) {
-      document.getElementById("skip").disabled = true;
-      disableAll(); mamook_event( { "event": "skip" } ); return true;
+      document.getElementById("skip").disabled = true; mamook_event( { "event": "skip" } ); return true;
     };
   },
 
@@ -46,9 +45,9 @@ var mamook_handler = {
         document.getElementById("goback").disabled = true;
     }
     for( var idx=0; idx<payload.items.length; idx++ ){
-        const thisIdx = idx;
+        const thisId = payload.items[idx].id;
         document.getElementById("pick_" + idx).onclick = function(evt) {
-            disableAll(); mamook_event( { "event": "pick", "value" : thisIdx } ); return true;
+            disableAll(); mamook_event( { "event": "pick", "value" : thisId } ); return true;
         };
     } 
     document.getElementById("goback").onclick = function(evt) {
@@ -107,5 +106,9 @@ var mamook_handler = {
     document.getElementById("goback").onclick = function(evt) {
         disableAll(); mamook_event( { "event": "goback" } ); return true;
     };
+  },
+
+  AI : function(payload){
+    document.getElementById("controlarea").innerHTML = '<p>Please wait while the offer is assessed.</p>';
   }
 };

@@ -5,6 +5,7 @@ function mamook_event(event){
   $.ajax({    
     type: "POST",
     url: "{{ url_for( 'event') }}",
+    contentType: "application/json; charset=utf-8",
     cache: false,
     data: JSON.stringify(event),
     success: function(){
@@ -34,8 +35,8 @@ function mamook_retrieve(){
   $.ajax({
     url: "{{ url_for( 'payload') }}",
     cache: false,
+    dataType: "json",
     success: function(payload){
-      eval('payload = ' + payload +";");
       window.mamook_state   = payload.state;
       console.log(window.mamook_state);
       window.mamook_payload = payload;
@@ -48,6 +49,7 @@ window.mamook_check = function() {
   $.ajax({
     url: "{{ url_for( 'state') }}",
     cache: false,
+    dataType: "text",
     success: function(state){
       if(window.mamook_state != state){
         mamook_retrieve();
@@ -59,8 +61,14 @@ window.mamook_check = function() {
 }
 
 {% if ui == 'base' %}
+document.getElementById("videoarea").innerHTML = '<video id="video" width="320" height="240"><source src="/static/e01.mp4" type="video/mp4">Your browser does not support the video tag.</video>';
 document.getElementById("workarea").innerHTML = "<button id='start'>START</button>";
 document.getElementById("start").onclick = function(evt) {
+  document.getElementById("video").play();
+  window.setTimeout(function(){
+    document.getElementById("video").pause();
+    document.getElementById("videoarea").style.display = 'none';
+  }, 1000);
   document.getElementById("workarea").innerHTML = "";
   window.mamook_check();
 }

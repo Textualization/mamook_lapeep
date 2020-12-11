@@ -1,6 +1,7 @@
 import random
 import datetime
 import json
+import re
 
 from transitions import Machine
 from transitions.extensions.diagrams import GraphMachine
@@ -90,11 +91,11 @@ class MamookSession(object):
         return self.graph.generate()
 
     def set_artist(self, artist):
-        self.artist = artist
+        self.artist = int(artist)
         self.store()
         
     def set_item(self, item):
-        self.item = item
+        self.item = int(item)
         self.store()
 
     def set_offer(self, offer):
@@ -111,7 +112,7 @@ class MamookSession(object):
         else:
             self.redis.hset(self.key, mapping={ "state": self.state, "events" : 0 })
         if self.redis.hexists(self.key, "events"):
-            self.artist = int(self.redis.hget(self.key, "events"))
+            self.events = int(self.redis.hget(self.key, "events"))
         if self.redis.hexists(self.key, "artist"):
             self.artist = int(self.redis.hget(self.key, "artist"))
         if self.redis.hexists(self.key, "item"):
@@ -147,16 +148,24 @@ class MamookSession(object):
             artists = []
             for idx in range(0, artist_count):
                 artists.append(decode_dict(self.redis.hgetall("a-{}".format(idx))))
+                artists[-1]['id'] = int(idx)
             return { slot: artists }
         elif slot == "artist":
-            return { slot : decode_dict(self.redis.hgetall("a-{}".format(self.artist))) }
+            artist = decode_dict(self.redis.hgetall("a-{}".format(self.artist)))
+            artist['id'] = int(self.artist)
+            return { slot : artist }
         elif slot == "item":
-            return { slot : decode_dict(self.redis.hgetall("i-{}".format(self.item))) }
+            item = decode_dict(self.redis.hgetall("i-{}".format(self.item)))
+            item['id'] = int(self.item)
+            return { slot : item }
         elif slot == "items":
             items = []
             for idx in self.redis.smembers("a-{}-items".format(self.artist)):
                 items.append(decode_dict(self.redis.hgetall("i-{}".format(idx.decode("utf-8")))))
+                items[-1]['id'] = int(idx)
             return { slot: items }
+        elif slot == "offer":
+            return { slot: self.offer }
         return {}
 
     def record_event(self, evt):
@@ -168,8 +177,11 @@ class MamookSession(object):
 def decode_dict(d):
     r = {}
     for k, v in d.items():
-        r[k.decode('utf-8')] = v.decode('utf-8')
+        r[k.decode('utf-8')] = escape_quotes(v.decode('utf-8'))
     return r
+
+def escape_quotes(s):
+    return re.sub("'", "\\'", s)
 
 def create_session(redis):
     _id   = int(MamookSession(None, redis)._id)

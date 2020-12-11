@@ -4,6 +4,9 @@ import tempfile
 import io
 import smtplib
 import datetime
+import ast
+import random
+
 from email.message import EmailMessage
 from functools import wraps
 
@@ -78,7 +81,10 @@ def payload(nonce=None, session_id=None):
     filled_slots = { "session" : session }
     for slot in slots:
         filled_slots.update( session.slot(slot) )
-    resp     = render_template_string(template, **filled_slots)
+    resp = render_template_string(template, **filled_slots)
+    print(1, resp)
+    print(2, ast.literal_eval(resp))
+    resp = json.dumps(ast.literal_eval(resp)) # fix ' vs "
     print(resp)
     return resp
 
@@ -108,3 +114,19 @@ def manual():
 @app.route('/static/<path:filename>')
 def download_file(filename):
     return send_from_directory('static', filename)
+
+@app.route('/classifier', methods=['POST'])
+def classifier_stub():
+    action = request.json
+    print(action)
+    # this is a stub, the classifier is in a different server
+    if random.random() < 0.01:
+        if random.random() < 0.5:
+            return "YES"
+        else:
+            return "NO"
+    if random.random() < 0.5:
+        return render_template("sample1.svg", artist=action['artist'], item=action['item'] )
+    else:
+        return render_template("sample2.svg", artist=action['artist'], item=action['item'] )
+    

@@ -3,14 +3,16 @@ var mamook_handler = {
     var url = "{{ url_for('landing', _external='true') }}";
     var alternate = "{{ url_for('manual', _external='true') }}";
     var code = document.cookie.substr(document.cookie.indexOf('=') + 1);
-    document.getElementById("workarea").innerHTML = "<p>Please scan the following QR code from your mobile device to begin:</p><div id='qrcode'></div><p>Alternatively, you can go to <a href='" + alternate + "'>" + alternate +"</a> and enter the code " + code + "</p>";
+    document.getElementById("workarea").innerHTML = "<p>Please scan the following QR code from your mobile device to begin:</p>" +
+      "<div id='qrcode'></div>" +
+      "<p>Alternatively, you can go to <a href='" + alternate + "'>" + alternate +"</a> and enter the code " + code + "</p>";
     new QRCode(document.getElementById("qrcode"), url + "?nonce=" + code);
   },
 
   START : function(payload) {
-    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>';
-   // enabling audio will be a problem
-    // https://stackoverflow.com/questions/49930680/how-to-handle-uncaught-in-promise-domexception-play-failed-because-the-use
+    document.getElementById("video").src = payload.video;
+    document.getElementById("workarea").innerHTML = "";
+    document.getElementById("videoarea").style.display = 'block';
     document.getElementById("video").play();
     document.getElementById("video").onended = function(){
       mamook_event({ 'event' : "finishedvideo" });
@@ -18,6 +20,8 @@ var mamook_handler = {
   },
 
   CHOOSE_ARTIST : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
     var html = '<h1>Please choose an artist to trade with</h1><ol>';
     for( var idx=0; idx<payload.artists.length; idx++){
         html += '<li>' + payload.artists[idx].name + ' <img src="' + payload.artists[idx].photo +'"></li>';
@@ -27,6 +31,8 @@ var mamook_handler = {
   },
 
   CHOOSE_ITEM : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
     var html = '<h1>For artist ' + payload.artist.name + ' choose an item to trade for</h1><ol>';
     for( var idx=0; idx<payload.items.length; idx++){
         html += '<li>' + payload.items[idx].name + ' <img src="' + payload.items[idx].photo +'"><br/>' +
@@ -37,13 +43,17 @@ var mamook_handler = {
   },
     
   REVIEW : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
     document.getElementById("workarea").innerHTML = '<h1>Do you want to trade with artist ' + payload.artist.name +
           ' for item ' + payload.item.name +'?</h1>' +
           '<br/><img src="' + payload.item.photo + '"/>';
   },
     
   ASK_EXCHANGE : function(payload) {
-    document.getElementById("workarea").innerHTML = '<video id="video" width="320" height="240"><source src="' + payload.video + '" type="video/mp4">Your browser does not support the video tag.</video>';
+    document.getElementById("video").src = payload.video;
+    document.getElementById("workarea").innerHTML = "";
+    document.getElementById("videoarea").style.display = 'block';
     document.getElementById("video").play();
     document.getElementById("video").onended = function(){
       mamook_event({ 'event' : "finishedvideo" });
@@ -51,9 +61,38 @@ var mamook_handler = {
   },
 
   GET_OFFER : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
     document.getElementById("workarea").innerHTML = '<h1>What do you offer artist ' + payload.artist.name +
           ' in exchange for item ' + payload.item.name +'?</h1>' +
           '<br/><img src="' + payload.item.photo + '"/>';
+  },
+
+  AI : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
+    function checkML() {
+      $.ajax({    
+        type: "POST",
+        url: payload.classifier, // cross-site headers needed or same host server
+        cache: false,
+        data: JSON.stringify({ "offer" : payload.offer, "item" : payload.item.id, "artist" : payload.artist.id }),
+        success: function(result){
+          if(result == "YES"){
+            document.getElementById("workarea").innerHTML = "YES";
+            mamook_event({ 'event' : "classifieryes" });
+          }else if(result == "NO"){
+            document.getElementById("workarea").innerHTML = "NO";
+            mamook_event({ 'event' : "classifierno" });
+          }else { // SVG
+            document.getElementById("workarea").innerHTML = result;
+            window.setTimeout(function() { checkML() }, 3000);
+          }
+        },
+        dataType: "text",
+        contentType: "application/json"
+      });
+    }
+    checkML();
   }
-    
 };
