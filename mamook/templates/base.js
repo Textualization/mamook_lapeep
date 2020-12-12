@@ -61,8 +61,8 @@ window.mamook_check = function() {
 }
 
 {% if ui == 'base' %}
-document.getElementById("videoarea").innerHTML = '<video id="video" width="320" height="240"><source src="/static/e01.mp4" type="video/mp4">Your browser does not support the video tag.</video>';
-document.getElementById("workarea").innerHTML = "<button id='start'>START</button>";
+document.getElementById("videoarea").innerHTML = '<video id="video" width="320" height="240"><source src="{{ static }}/sample/lorem.mp4" type="video/mp4">Your browser does not support the video tag.</video>';
+document.getElementById("workarea").innerHTML = "<p>Start of the shift, press this button to allow videos autoplay with sound:</p><button id='start'>START</button>";
 document.getElementById("start").onclick = function(evt) {
   document.getElementById("video").play();
   window.setTimeout(function(){

@@ -1,4 +1,14 @@
 var mamook_handler = {
+  showvideo : function(payload) {
+    document.getElementById("video").src = payload.video;
+    document.getElementById("workarea").innerHTML = "";
+    document.getElementById("videoarea").style.display = 'block';
+    document.getElementById("video").play();
+    document.getElementById("video").onended = function(){
+      mamook_event({ 'event' : "finishedvideo" });
+    };
+  },
+  
   QR : function(payload) {
     var url = "{{ url_for('landing', _external='true') }}";
     var alternate = "{{ url_for('manual', _external='true') }}";
@@ -9,15 +19,7 @@ var mamook_handler = {
     new QRCode(document.getElementById("qrcode"), url + "?nonce=" + code);
   },
 
-  START : function(payload) {
-    document.getElementById("video").src = payload.video;
-    document.getElementById("workarea").innerHTML = "";
-    document.getElementById("videoarea").style.display = 'block';
-    document.getElementById("video").play();
-    document.getElementById("video").onended = function(){
-      mamook_event({ 'event' : "finishedvideo" });
-    };
-  },
+  START : function(payload) { this.showvideo(payload); },
 
   CHOOSE_ARTIST : function(payload) {
     document.getElementById("videoarea").style.display = 'none';
@@ -71,12 +73,13 @@ var mamook_handler = {
   AI : function(payload) {
     document.getElementById("videoarea").style.display = 'none';
     document.getElementById("video").pause();
+    payload.count = 0;
     function checkML() {
       $.ajax({    
         type: "POST",
         url: payload.classifier, // cross-site headers needed or same host server
         cache: false,
-        data: JSON.stringify({ "offer" : payload.offer, "item" : payload.item.id, "artist" : payload.artist.id }),
+        data: JSON.stringify({ "offer" : payload.offer, "item" : payload.item.id, "artist" : payload.artist.id, "count" : payload.count }),
         success: function(result){
           if(result == "YES"){
             document.getElementById("workarea").innerHTML = "YES";
@@ -86,6 +89,7 @@ var mamook_handler = {
             mamook_event({ 'event' : "classifierno" });
           }else { // SVG
             document.getElementById("workarea").innerHTML = result;
+            payload.count++;
             window.setTimeout(function() { checkML() }, 3000);
           }
         },
@@ -94,5 +98,36 @@ var mamook_handler = {
       });
     }
     checkML();
-  }
+  },
+
+  REJECTED :   function(payload) { this.showvideo(payload) },
+  
+  ACCEPTED :   function(payload) { this.showvideo(payload) },
+
+  RETRY :      function(payload) { this.showvideo(payload) },
+
+  AI2 :        function(payload) { this.AI(payload); },
+  
+  GET_OFFER2 : function(payload) { this.GET_OFFER(payload); },
+  
+  REJECTED2 :  function(payload) { this.showvideo(payload) },
+  
+  GUIDED :  function(payload) {
+    //TODO: show the options
+  },
+
+  COLLECT :  function(payload) {
+    //TODO: now or later
+  },
+
+  NOW :  function(payload) {
+    //TODO: say to record
+  },
+
+  LATER : function(payload) { this.showvideo(payload) },
+  
+  DELIVER : function(payload) { this.showvideo(payload) },
+  
+  END : function(payload) { this.showvideo(payload) }
+  
 };

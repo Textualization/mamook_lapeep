@@ -3,12 +3,14 @@ var mamook_handler = {
      mamook_event({ "event" : "scanned" });
   },
 
-  START : function(payload) {
+  watchskip : function(payload) {
     document.getElementById("controlarea").innerHTML = "<p>Please watch the video.</p><button id='skip'>SKIP</button>";
     document.getElementById("skip").onclick = function(evt) {
       document.getElementById("skip").disabled = true; mamook_event( { "event": "skip" } ); return true;
     };
-  },
+  },    
+
+  START : function(payload) { this.watchskip(payload); },
 
   CHOOSE_ARTIST : function(payload) {
     var html = '<ol>';
@@ -110,5 +112,57 @@ var mamook_handler = {
 
   AI : function(payload){
     document.getElementById("controlarea").innerHTML = '<p>Please wait while the offer is assessed.</p>';
-  }
+  },
+
+  ACCEPTED : function(payload) { this.watchskip(payload); },
+
+  REJECTED : function(payload) {
+    var html = '<p>Please watch the video and retry. Or try these options:</p><ol>';
+    html += '<li><button id="restart">RESTART</button></li>';
+    html += '<li><button id="help">HELP</button></li>';
+    html += '<li><button id="skip">SKIP</button></li>';
+    html += '</ol>';
+    document.getElementById("controlarea").innerHTML = html;
+    function disableAll() {
+        document.getElementById("skip").disabled = true;
+        document.getElementById("restart").disabled = true;
+        document.getElementById("help").disabled = true;
+    }
+    document.getElementById("restart").onclick = function(evt) {
+        disableAll(); mamook_event( { "event": "restart" } ); return true;
+    };
+    document.getElementById("help").onclick = function(evt) {
+        disableAll(); mamook_event( { "event": "help" } ); return true;
+    };
+    document.getElementById("skip").onclick = function(evt) {
+        disableAll(); mamook_event( { "event": "skip" } ); return true;
+    };
+  },
+  
+  RETRY : function(payload) { this.watchskip(payload); },
+
+  GET_OFFER2 : function(payload) { this.GET_OFFER(payload); },
+  
+  AI2 : function(payload) { this.AI(payload); },
+
+  REJECTED2 : function(payload) { this.watchskip(payload); },
+
+  GUIDED : function(payload) {
+    //TODO: show options
+  },
+
+  COLLECT : function(payload) {
+    //TODO: show options now or later
+  },
+    
+  NOW : function(payload) {
+    //TODO: record video
+  },
+  
+  LATER : function(payload) { this.watchskip(payload); },
+  
+  DELIVER : function(payload) { this.watchskip(payload); },
+
+  END : function(payload) { this.watchskip(payload); }
+  
 };

@@ -78,7 +78,7 @@ def payload(nonce=None, session_id=None):
     template = redis_client.get("t-" + session.state).decode('utf-8')
     slots    = json.loads(redis_client.get("t-{}-slots".format(session.state)).decode('utf-8'))
     print(slots)
-    filled_slots = { "session" : session }
+    filled_slots = { "session" : session, "static" : app.config['STATIC_URL'] }
     for slot in slots:
         filled_slots.update( session.slot(slot) )
     resp = render_template_string(template, **filled_slots)
@@ -102,7 +102,7 @@ def event(nonce=None, session_id=None):
 
 @app.route('/<ui>.js', methods=['GET'])
 def js(ui):
-    resp = Response(render_template("base.js", ui=ui), content_type="application/javascript")
+    resp = Response(render_template("base.js", ui=ui, static=app.config['STATIC_URL']), content_type="application/javascript")
     resp.headers.add('Expires', datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S GMT"))
     return resp
 
@@ -118,15 +118,11 @@ def download_file(filename):
 @app.route('/classifier', methods=['POST'])
 def classifier_stub():
     action = request.json
-    print(action)
     # this is a stub, the classifier is in a different server
-    if random.random() < 0.01:
+    if action['count'] > 5 and random.random() < 0.3:
         if random.random() < 0.5:
             return "YES"
         else:
             return "NO"
-    if random.random() < 0.5:
-        return render_template("sample1.svg", artist=action['artist'], item=action['item'] )
-    else:
-        return render_template("sample2.svg", artist=action['artist'], item=action['item'] )
+    return render_template("sample1.svg" if random.random() < 0.5 else "sample2.svg", artist=action['artist'], item=action['item'] )
     

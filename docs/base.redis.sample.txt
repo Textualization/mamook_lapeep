@@ -2,58 +2,65 @@ INFO "general"
 
 SET t-QR                  "{ 'state': '{{ session.state }}' }"
 SET t-QR-slots            "[]"
-SET t-START               "{ 'state': '{{ session.state }}', 'video': '{{ url_for('download_file', filename='lorem.mp4') }}' }"
+SET t-START               "{ 'state': '{{ session.state }}', 'video': '{{ static|safe }}/sample/start.mp4' }"
 SET t-START-slots         "[]"
-SET t-CHOOSE_ARTIST       "{ 'state': '{{ session.state }}', 'artists' : {{ artists|safe }} }"
+SET t-CHOOSE_ARTIST       "{ 'state': '{{ session.state }}', 'artists' : [ {% for artist in artists %} { 'name' : '{{ artist.name|safe }}', 'id' : {{artist.id}}, 'photo' : '{{static|safe}}/{{artist.photo}}' } {% if not loop.last %} , {% endif %} {% endfor %} ] }"
 SET t-CHOOSE_ARTIST-slots "[ \"artists\" ]"
-SET t-CHOOSE_ITEM         "{ 'state': '{{ session.state }}', 'items' : {{ items|safe }}, 'artist' : {{ artist|safe }} }"
+SET t-CHOOSE_ITEM         "{ 'state': '{{ session.state }}', 'artist' : { 'name' : '{{ artist.name|safe }}', 'id' : {{artist.id}}, 'photo' : '{{static|safe}}/{{artist.photo}}' }, 'items' : [ {% for item in items %} { 'name' : '{{ item.name|safe }}', 'description' : '{{ item.description|safe }}', 'id' : {{item.id}}, 'photo' : '{{static|safe}}/{{item.photo}}' } {% if not loop.last %} , {% endif %} {% endfor %} ] }"
 SET t-CHOOSE_ITEM-slots   "[ \"items\", \"artist\" ]"
-SET t-REVIEW              "{ 'state': '{{ session.state }}', 'item' : {{ item|safe }}, 'artist' : {{ artist|safe }} }"
+SET t-REVIEW              "{ 'state': '{{ session.state }}', 'artist' : { 'name' : '{{ artist.name|safe }}', 'id' : {{artist.id}}, 'photo' : '{{static|safe}}/{{artist.photo}}' }, 'item' : { 'name' : '{{ item.name|safe }}', 'description' : '{{ item.description|safe }}', 'id' : {{item.id}}, 'photo' : '{{static|safe}}/{{item.photo}}' } }"
 SET t-REVIEW-slots        "[ \"item\", \"artist\" ]"
-SET t-ASK_EXCHANGE        "{ 'state': '{{ session.state }}', 'video': '{{ artist.videointro  }}' }"
+SET t-ASK_EXCHANGE        "{ 'state': '{{ session.state }}', 'video': '{{ static|safe }}/{{ artist.videointro  }}' }"
 SET t-ASK_EXCHANGE-slots  "[ \"artist\" ]"
-SET t-GET_OFFER           "{ 'state': '{{ session.state }}', 'item' : { 'name' : '{{ item.name|safe }}', 'photo' : '{{ item.name|safe }}' }, 'artist' : { 'name' : '{{ artist.name|safe }}', 'photo' : '{{ artist.name|safe }}' } }"
+SET t-GET_OFFER           "{ 'state': '{{ session.state }}', 'item' : { 'name' : '{{ item.name|safe }}', 'photo' : '{{static|safe}}/{{ item.photo|safe }}' }, 'artist' : { 'name' : '{{ artist.name|safe }}', 'photo' : '{{ static|safe}}/{{ artist.photo|safe }}' } }"
 SET t-GET_OFFER-slots     "[ \"item\", \"artist\" ]"
 SET t-AI                  "{ 'state': '{{ session.state }}', 'item' : { 'id' : {{ item.id }} }, 'artist' : { 'id' : {{ artist.id }} }, 'classifier' : '{{ artist.classifier | safe }}', 'offer' : '{{ offer | safe }}' }"
 SET t-AI-slots            "[ \"item\", \"artist\", \"offer\" ]"
-SET t-ACCEPTED            "{ 'state': '{{ session.state }}' }"
+SET t-ACCEPTED            "{ 'state': '{{ session.state }}', 'video' : '{{static|safe }}/sample/accepted.mp4' }"
 SET t-ACCEPTED-slots      "[]"
-SET t-REJECTED            "{ 'state': '{{ session.state }}' }"
-SET t-REJECTED-slots      "[]"
-SET t-RETRY               "{ 'state': '{{ session.state }}' }"
+SET t-REJECTED            "{ 'state': '{{ session.state }}', 'video' : '{{ static|safe }}/{{ artist.reject  }}' }"
+SET t-REJECTED-slots      "[ \"artist\" ]"
+SET t-RETRY               "{ 'state': '{{ session.state }}', 'video' : '{{static|safe }}/sample/retry.mp4' }"
 SET t-RETRY-slots         "[]"
-SET t-GET_OFFER2          "{ 'state': '{{ session.state }}' }"
-SET t-GET_OFFER2-slots    "[]"
-SET t-AI2                 "{ 'state': '{{ session.state }}' }"
-SET t-AI2-slots           "[]"
-SET t-REJECTED2           "{ 'state': '{{ session.state }}' }"
+SET t-GET_OFFER2          "{ 'state': '{{ session.state }}', 'item' : { 'name' : '{{ item.name|safe }}', 'photo' : '{{static|safe}}/{{ item.photo|safe }}' }, 'artist' : { 'name' : '{{ artist.name|safe }}', 'photo' : '{{ static|safe}}/{{ artist.photo|safe }}' } }"
+SET t-GET_OFFER2-slots    "[ \"item\", \"artist\" ]"
+SET t-AI2                 "{ 'state': '{{ session.state }}', 'item' : { 'id' : {{ item.id }} }, 'artist' : { 'id' : {{ artist.id }} }, 'classifier' : '{{ artist.classifier | safe }}', 'offer' : '{{ offer | safe }}' }"
+SET t-AI2-slots           "[ \"item\", \"artist\", \"offer\" ]"
+SET t-REJECTED2           "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/sample/rejected2.mp4' }"
 SET t-REJECTED2-slots     "[]"
-SET t-GUIDED              "{ 'state': '{{ session.state }}' }"
-SET t-GUIDED-slots        "[]"
+SET t-GUIDED              "{ 'state': '{{ session.state }}', 'options' : {{ options | safe }}, 'artist' : { 'name' : '{{ artist.name|safe}}' } }"
+SET t-GUIDED-slots        "[ \"artist\", \"options\" ]"
 SET t-COLLECT             "{ 'state': '{{ session.state }}' }"
 SET t-COLLECT-slots       "[]"
 SET t-NOW                 "{ 'state': '{{ session.state }}' }"
 SET t-NOW-slots           "[]"
-SET t-LATER               "{ 'state': '{{ session.state }}' }"
+SET t-LATER               "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/sample/later.mp4' }"
 SET t-LATER-slots         "[]"
-SET t-DELIVER             "{ 'state': '{{ session.state }}' }"
-SET t-DELIVER-slots       "[]"
-SET t-END                 "{ 'state': '{{ session.state }}' }"
+SET t-DELIVER             "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/{{item.delivery|safe}}' }"
+SET t-DELIVER-slots       "[ \"item\" ]"
+SET t-END                 "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/sample/end.mp4' }"
 SET t-END-slots           "[]"
 
 INFO "########## artists ##########"
 SET artist-count 2
-HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "http://example.com/awesome.jpg" avatar "http://example.com/awesome-avi.jpg" videointro "http://example.com/awesome.mp4" classifier "/classifier"
-HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "http://example.com/talented.jpg" avatar "http://example.com/talented-avi.jpg" videointro "http://example.com/talented.mp4" classifier "/classifier"
+HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "sample/awesome.jpg" avatar "sample/awesome-avi.jpg" videointro "sample/awesome.mp4" classifier "/classifier" rejection "sample/awesome-rejection.mp4"
+HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "sample/talented.jpg" avatar "sample/talented-avi.jpg" videointro "sample/talented.mp4" classifier "/classifier" rejection "sample/talented-rejection.mp4 options 2"
+
+INFO "########## options ##########"
+LPUSH o-0 "give me a C"
+LPUSH o-0 "give me a B"
+LPUSH o-0 "give me an A"
+LPUSH o-1 "I am interested in world peace"
+LPUSH o-1 "This is rather long and convoluted but I'm sure you can provide it"
 
 INFO "########## items ##########"
 
 SET item-count 4
-HSET i-0 name "nice poem" artist 0 description "poem blob" photo "http://example.com/talented/poem.jpg" delivery "http://example.com/talented/poem.mp4" classifier-id 0
-HSET i-1 name "nice map" artist 0 description "map blob" photo "http://example.com/awesome/map.jpg" delivery "http://example.com/awesome/map.mp4" classifier-id 1
+HSET i-0 name "nice poem" artist 0 description "poem blob" photo "sample/poem.jpg" delivery "sample/poem.mp4" classifier-id 0
+HSET i-1 name "nice map" artist 0 description "map blob" photo "sample/map.jpg" delivery "sample/map.mp4" classifier-id 1
 SADD a-0-items 0 1
-HSET i-2 name "pretty installation" artist 1 description "pretty blob" photo "http://example.com/talented/installation.jpg" delivery "http://example.com/talented/installation.mp4" classifier-id 0
-HSET i-3 name "pretty song" artist 1 description "song blob" photo "http://example.com/talented/song.jpg" delivery "http://example.com/talented/song.mp4" classifier-id 1
+HSET i-2 name "pretty installation" artist 1 description "pretty blob" photo "sample/installation.jpg" delivery "sample/installation.mp4" classifier-id 0
+HSET i-3 name "pretty song" artist 1 description "song blob" photo "sample/song.jpg" delivery "sample/song.mp4" classifier-id 1
 SADD a-1-items 2 3
 SET session-count 0
 SET event-count 0
