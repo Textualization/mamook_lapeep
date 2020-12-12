@@ -119,10 +119,15 @@ def download_file(filename):
 def classifier_stub():
     action = request.json
     # this is a stub, the classifier is in a different server
-    if action['count'] > 5 and random.random() < 0.3:
-        if random.random() < 0.5:
+    if action['count'] > 5:
+        if int(action['item'] % 2 == 0):
             return "YES"
         else:
             return "NO"
-    return render_template("sample1.svg" if random.random() < 0.5 else "sample2.svg", artist=action['artist'], item=action['item'] )
+    return render_template("sample1.svg" if action['count'] % 2 == 0 else "sample2.svg", artist=action['artist'], item=action['item'] )
     
+@app.route('/upload', methods=['POST'])
+@nonce_required
+def upload():
+    print(request.files)
+    return "OK"

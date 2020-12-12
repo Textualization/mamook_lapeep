@@ -18,7 +18,7 @@ SET t-AI                  "{ 'state': '{{ session.state }}', 'item' : { 'id' : {
 SET t-AI-slots            "[ \"item\", \"artist\", \"offer\" ]"
 SET t-ACCEPTED            "{ 'state': '{{ session.state }}', 'video' : '{{static|safe }}/sample/accepted.mp4' }"
 SET t-ACCEPTED-slots      "[]"
-SET t-REJECTED            "{ 'state': '{{ session.state }}', 'video' : '{{ static|safe }}/{{ artist.reject  }}' }"
+SET t-REJECTED            "{ 'state': '{{ session.state }}', 'video' : '{{ static|safe }}/{{ artist.rejection }}' }"
 SET t-REJECTED-slots      "[ \"artist\" ]"
 SET t-RETRY               "{ 'state': '{{ session.state }}', 'video' : '{{static|safe }}/sample/retry.mp4' }"
 SET t-RETRY-slots         "[]"
@@ -44,7 +44,7 @@ SET t-END-slots           "[]"
 INFO "########## artists ##########"
 SET artist-count 2
 HSET a-0 name "Awesome Artist" bio "Awesome bio" statement "Awesome statement" photo "sample/awesome.jpg" avatar "sample/awesome-avi.jpg" videointro "sample/awesome.mp4" classifier "/classifier" rejection "sample/awesome-rejection.mp4"
-HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "sample/talented.jpg" avatar "sample/talented-avi.jpg" videointro "sample/talented.mp4" classifier "/classifier" rejection "sample/talented-rejection.mp4 options 2"
+HSET a-1 name "Talented Artist" bio "Talented bio" statement "Talented statement" photo "sample/talented.jpg" avatar "sample/talented-avi.jpg" videointro "sample/talented.mp4" classifier "/classifier" rejection "sample/talented-rejection.mp4"
 
 INFO "########## options ##########"
 LPUSH o-0 "give me a C"

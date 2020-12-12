@@ -113,15 +113,28 @@ var mamook_handler = {
   REJECTED2 :  function(payload) { this.showvideo(payload) },
   
   GUIDED :  function(payload) {
-    //TODO: show the options
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
+    var html = '<h1>' + artist.name + ' is interested in the following items to trade for</h1><ol>';
+    for( var idx=0; idx<payload.options.length; idx++){
+        html += '<li>' + payload.options[idx].name + '</li>';
+    }
+    html += '</ol>';
+    document.getElementById("workarea").innerHTML = html;    
   },
 
   COLLECT :  function(payload) {
-    //TODO: now or later
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
+    var html = '<p>Do you want to record your trade <b>now</b> or do it <b>later</b> (honour system).</p>';
+    document.getElementById("workarea").innerHTML = html;    
   },
 
   NOW :  function(payload) {
-    //TODO: say to record
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
+    var html = '<p>Please record your trade.</p>';
+    document.getElementById("workarea").innerHTML = html;    
   },
 
   LATER : function(payload) { this.showvideo(payload) },

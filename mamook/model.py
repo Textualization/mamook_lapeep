@@ -63,8 +63,11 @@ class MamookSession(object):
         { 'trigger': 'picknow',       'source' : 'COLLECT',          'dest' : 'NOW'             },
         { 'trigger': 'picklater',     'source' : 'COLLECT',          'dest' : 'LATER'           },
         { 'trigger': 'collect',       'source' : 'NOW',              'dest' : 'DELIVER'         , 'before': 'set_received' },
-        { 'trigger': 'confirm',       'source' : 'LATER',            'dest' : 'DELIVER'         },
+        { 'trigger': 'picklater',     'source' : 'NOW',              'dest' : 'LATER'           },
+        { 'trigger': 'finishedvideo', 'source' : 'LATER',            'dest' : 'DELIVER'         },
+        { 'trigger': 'skip',          'source' : 'LATER',            'dest' : 'DELIVER'         },
         { 'trigger': 'recordedvideo', 'source' : 'DELIVER',          'dest' : 'END'             },
+        { 'trigger': 'picklater',     'source' : 'DELIVER',          'dest' : 'LATER'           },
         { 'trigger': 'timeout',       'source' : '*',                'dest' : 'QR'              }
         ]
 
@@ -166,6 +169,9 @@ class MamookSession(object):
             return { slot: items }
         elif slot == "offer":
             return { slot: self.offer }
+        elif slot == "options":
+            options = list(map(lambda x:escape_quotes(x.decode("utf-8")), self.redis.lrange("o-{}".format(self.artist), 0, 10)))
+            return { slot: options }
         return {}
 
     def record_event(self, evt):
