@@ -10,6 +10,8 @@ var mamook_handler = {
   },
   
   QR : function(payload) {
+    document.getElementById("videoarea").style.display = 'none';
+    document.getElementById("video").pause();
     var url = "{{ url_for('landing', _external='true') }}";
     var alternate = "{{ url_for('manual', _external='true') }}";
     var code = document.cookie.substr(document.cookie.indexOf('=') + 1);
