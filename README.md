@@ -32,7 +32,7 @@ their own gifts to the data bank– creating a composite community avatar that w
 complexity as viewers contribute. This future community avatar that will then be reviewed,
 programmed and available for the next iteration of the project.
 
-*All questions about Mamook Lapeep, please contact [Nicola Harwood](http://www.nicolaharwood.com/).*
+*For any enquires about Mamook Lapeep, please contact [Nicola Harwood](http://www.nicolaharwood.com/).*
 
 
 
