@@ -155,11 +155,11 @@ var mamook_handler = {
     html += '</ol>';
     document.getElementById("controlarea").innerHTML = html;
     function disableAll() {
-        for( var idx=0; idx<payload.artists.length; idx++ ){
+        for( var idx=0; idx<payload.options.length; idx++ ){
             document.getElementById("pick_" + idx).disabled = true;
         }
     }
-    for( var idx=0; idx<payload.artists.length; idx++ ){
+    for( var idx=0; idx<payload.options.length; idx++ ){
         const thisIdx = idx;
         document.getElementById("pick_" + idx).onclick = function(evt) {
             disableAll(); mamook_event( { "event": "pick", "value" : thisIdx } ); return true;

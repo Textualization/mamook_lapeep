@@ -1,10 +1,10 @@
 from flask import Flask
-from flask_redis import FlaskRedis
+from redis import StrictRedis
 
 app = Flask('mamook')
 
 app.config.from_object('config')
-redis_client = FlaskRedis(app)
+redis_client = StrictRedis()
 
 from mamook import views
 

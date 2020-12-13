@@ -76,8 +76,10 @@ def payload(nonce=None, session_id=None):
     session  = MamookSession(session_id, redis_client)
     print(session_id, session.state, session.artist, session.item)
     template = redis_client.get("t-" + session.state).decode('utf-8')
-    slots    = json.loads(redis_client.get("t-{}-slots".format(session.state)).decode('utf-8'))
+    brace = template.index('{')
+    slots = template[:brace].strip().split(" ")
     print(slots)
+    template = template[brace:]
     filled_slots = { "session" : session, "static" : app.config['STATIC_URL'] }
     for slot in slots:
         filled_slots.update( session.slot(slot) )

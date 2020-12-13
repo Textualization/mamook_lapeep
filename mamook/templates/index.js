@@ -115,9 +115,9 @@ var mamook_handler = {
   GUIDED :  function(payload) {
     document.getElementById("videoarea").style.display = 'none';
     document.getElementById("video").pause();
-    var html = '<h1>' + artist.name + ' is interested in the following items to trade for</h1><ol>';
+    var html = '<h1>' + payload.artist.name + ' is interested in the following items to trade for</h1><ol>';
     for( var idx=0; idx<payload.options.length; idx++){
-        html += '<li>' + payload.options[idx].name + '</li>';
+        html += '<li>' + payload.options[idx] + '</li>';
     }
     html += '</ol>';
     document.getElementById("workarea").innerHTML = html;    
