@@ -66,8 +66,8 @@ class MamookSession(object):
         { 'trigger': 'finishedvideo', 'source' : 'LATER',            'dest' : 'DELIVER'         },
         { 'trigger': 'skip',          'source' : 'LATER',            'dest' : 'DELIVER'         },
         { 'trigger': 'finishedvideo', 'source' : 'DELIVER',          'dest' : 'END'             },
-        { 'trigger': 'skip',          'source' : 'DELIVER',          'dest' : 'END'             },
-        { 'trigger': 'timeout',       'source' : '*',                'dest' : 'QR'              }
+        { 'trigger': 'skip',          'source' : 'DELIVER',          'dest' : 'END'             } #,
+#        { 'trigger': 'timeout',       'source' : '*',                'dest' : 'QR'              }
         ]
 
     def __init__(self, _id, _redis):
