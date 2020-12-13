@@ -150,7 +150,7 @@ var mamook_handler = {
   GUIDED : function(payload) {
     var html = '<ol>';
     for( var idx=0; idx<payload.options.length; idx++ ){
-        html += '<li><button id="pick_' + idx + '">' + idx + '</button></li>';
+      html += '<li><button id="pick_' + idx + '">' + (idx+1) + '</button></li>';
     }
     html += '</ol>';
     document.getElementById("controlarea").innerHTML = html;
@@ -186,7 +186,7 @@ var mamook_handler = {
   },
     
   NOW : function(payload) {
-    if(!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
+    if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
       document.getElementById("controlarea").innerHTML = '<p>Your device cannot record, we will take your word for it.</p>';
       //TODO enable file upload instead and leave the "picklater" as a button
       window.setTimeout(function() { mamook_event({ 'event' : "picklater" }); }, 2000);
@@ -217,6 +217,7 @@ var mamook_handler = {
             options = {mimeType: 'video/webm'};
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
               console.error(`${options.mimeType} is not supported`);
+              //TODO back-off to upload or later
               options = {mimeType: ''};
             }
           }
@@ -226,6 +227,7 @@ var mamook_handler = {
           mediaRecorder = new MediaRecorder(window.stream, options);
         } catch (e) {
           console.error('Exception while creating MediaRecorder:', e);
+          //TODO back-off to upload or later
           //errorMsgElement.innerHTML = `Exception while creating MediaRecorder: ${JSON.stringify(e)}`;
           return;
         }
@@ -233,7 +235,7 @@ var mamook_handler = {
         console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
         recordButton.textContent = 'Stop Recording';
         playButton.disabled = true;
-        downloadButton.disabled = true;
+        uploadButton.disabled = true;
         mediaRecorder.onstop = function(event) {
           console.log('Recorder stopped: ', event);
           console.log('Recorded Blobs: ', recordedBlobs);
@@ -296,13 +298,20 @@ var mamook_handler = {
   
       uploadButton.onclick = function(evt) {
         const blob = new Blob(recordedBlobs, {type: 'video/webm'});
+        var fdata = new FormData();
+        fdata.append("file", blob, "video.webm");
 
         $.ajax({
           type: 'POST',
           url: '{{ url_for("upload") }}',
-          data: blob,
-          contentType: 'video/webm',
-          processData: false
+          data: fdata,
+          contentType: false,
+          processData: false,
+          cache: false,
+          success: function(data){
+            window.stream.stop();
+          }
+          //TODO on error, show backup file upload
         });
       };
 
@@ -318,6 +327,8 @@ var mamook_handler = {
   
   DELIVER : function(payload) { this.watchskip(payload); },
 
-  END     : function(payload) { this.watchskip(payload); }
+  END     : function(payload) {
+    document.getElementById("controlarea").innerHTML = "<p>Thanks! Hope you enjoyed it.</p>";
+  }
   
 };

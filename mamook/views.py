@@ -6,6 +6,7 @@ import smtplib
 import datetime
 import ast
 import random
+import os
 
 from email.message import EmailMessage
 from functools import wraps
@@ -67,27 +68,29 @@ def control(nonce=None, session_id=None):
 @nonce_required
 def state(nonce=None, session_id=None):
     _state = redis_client.hget("s-" + str(session_id), "state").decode('utf-8')
-    print(_state)
+    if app.config['DEBUG']:
+        print(_state)
     return _state
 
 @app.route('/payload', methods=['GET'])
 @nonce_required
 def payload(nonce=None, session_id=None):
     session  = MamookSession(session_id, redis_client)
-    print(session_id, session.state, session.artist, session.item)
+    if app.config['DEBUG']:
+        print(session_id, session.state, session.artist, session.item)
     template = redis_client.get("t-" + session.state).decode('utf-8')
     brace = template.index('{')
     slots = template[:brace].strip().split(" ")
-    print(slots)
+    if app.config['DEBUG']:
+        print(slots)
     template = template[brace:]
     filled_slots = { "session" : session, "static" : app.config['STATIC_URL'] }
     for slot in slots:
         filled_slots.update( session.slot(slot) )
     resp = render_template_string(template, **filled_slots)
-    print(1, resp)
-    print(2, ast.literal_eval(resp))
     resp = json.dumps(ast.literal_eval(resp)) # fix ' vs "
-    print(resp)
+    if app.config['DEBUG']:
+        print(resp)
     return resp
 
 @app.route('/event', methods=['POST'])
@@ -96,10 +99,21 @@ def event(nonce=None, session_id=None):
     evt = request.json
     session  = MamookSession(session_id, redis_client)
     session.record_event(evt)
-    print(evt, session.state)
-    session.trigger(evt['event'], evt.get('value', None))
-    print(session.state)
-    session.store()
+    if app.config['DEBUG']:
+        print(evt, session.state)
+    if evt['event'] == 'finishedvideo' and session.state == 'END':
+        old = (session_id, nonce)
+        session_id, nonce = create_session(redis_client)
+        if app.config['DEBUG']:
+            print("it's the end!", old, (session_id, nonce))
+        resp = make_response("OK")
+        resp.set_cookie('session', nonce)
+        return resp
+    else:
+        session.trigger(evt['event'], evt.get('value', None))
+        if app.config['DEBUG']:
+            print(session.state)
+        session.store()
     return "OK"
 
 @app.route('/<ui>.js', methods=['GET'])
@@ -130,6 +144,20 @@ def classifier_stub():
     
 @app.route('/upload', methods=['POST'])
 @nonce_required
-def upload():
-    print(request.files)
-    return "OK"
+def upload(nonce=None, session_id=None):
+    if app.config['DEBUG']:
+        print(request.files)
+
+    if 'file' not in request.files:
+        if app.config['DEBUG']:
+            print("error", request.files)
+        return "ERROR"
+    file = request.files['file']
+    if file:
+        session  = MamookSession(session_id, redis_client)
+        savepath = os.path.join(app.config['UPLOAD_FOLDER'], "upload-{}".format(session_id))
+        file.save(savepath)
+        session.collect("{}: '{}'".format(savepath, file.filename))
+        session.store()
+        return "OK"
+    return "ERROR"

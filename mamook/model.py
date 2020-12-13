@@ -4,8 +4,6 @@ import json
 import re
 
 from transitions import Machine
-from transitions.extensions.diagrams import GraphMachine
-from transitions.extensions.diagrams_graphviz import Graph
 
 class MamookSession(object):
 
@@ -55,6 +53,7 @@ class MamookSession(object):
         { 'trigger': 'finishedvideo', 'source' : 'RETRY',            'dest' : 'GET_OFFER2'      },
         { 'trigger': 'skip',          'source' : 'RETRY',            'dest' : 'GET_OFFER2'      },
         { 'trigger': 'offer',         'source' : 'GET_OFFER2',       'dest' : 'AI2'             , 'before' : 'set_offer' },
+        { 'trigger': 'goback',        'source' : 'GET_OFFER2',       'dest' : 'CHOOSE_ITEM'     },
         { 'trigger': 'classifieryes', 'source' : 'AI2',              'dest' : 'ACCEPTED'        },
         { 'trigger': 'classifierno',  'source' : 'AI2',              'dest' : 'REJECTED2'       },
         { 'trigger': 'finishedvideo', 'source' : 'REJECTED2',        'dest' : 'GUIDED'          },
@@ -66,8 +65,8 @@ class MamookSession(object):
         { 'trigger': 'picklater',     'source' : 'NOW',              'dest' : 'LATER'           },
         { 'trigger': 'finishedvideo', 'source' : 'LATER',            'dest' : 'DELIVER'         },
         { 'trigger': 'skip',          'source' : 'LATER',            'dest' : 'DELIVER'         },
-        { 'trigger': 'recordedvideo', 'source' : 'DELIVER',          'dest' : 'END'             },
-        { 'trigger': 'picklater',     'source' : 'DELIVER',          'dest' : 'LATER'           },
+        { 'trigger': 'finishedvideo', 'source' : 'DELIVER',          'dest' : 'END'             },
+        { 'trigger': 'skip',          'source' : 'DELIVER',          'dest' : 'END'             },
         { 'trigger': 'timeout',       'source' : '*',                'dest' : 'QR'              }
         ]
 
@@ -81,17 +80,19 @@ class MamookSession(object):
         self.item     = None
         self.offer    = None
         self.received = None
-        self.events   = 0
 
-        self.machine = GraphMachine(model=self, states=MamookSession.states,
-                                    transitions=MamookSession.transitions, initial='QR', title='Mamook Session')
-        self.graph = Graph(self.machine, title='session')
-        
+        self.machine = Machine(model=self, states=MamookSession.states, transitions=MamookSession.transitions, initial='QR')
         self.refresh()
 
-
     def to_dot(self):
-        return self.graph.generate()
+        import transitions.extensions.diagrams
+        import transitions.extensions.diagrams_graphviz
+        
+        machine = transitions.extensions.diagrams.GraphMachine(model=self, states=MamookSession.states,
+                                    transitions=MamookSession.transitions, initial='QR', title='Mamook Session')
+        graph = transitions.extensions.diagrams_graphviz.Graph(machine, title='session')
+
+        return graph.generate()
 
     def set_artist(self, artist):
         self.artist = int(artist)
@@ -113,9 +114,7 @@ class MamookSession(object):
         if self.redis.exists(self.key):
             self.machine.set_state(self.redis.hget(self.key, 'state').decode('utf-8'))
         else:
-            self.redis.hset(self.key, mapping={ "state": self.state, "events" : 0 })
-        if self.redis.hexists(self.key, "events"):
-            self.events = int(self.redis.hget(self.key, "events"))
+            self.redis.hset(self.key, "state", self.state)
         if self.redis.hexists(self.key, "artist"):
             self.artist = int(self.redis.hget(self.key, "artist"))
         if self.redis.hexists(self.key, "item"):
@@ -126,7 +125,7 @@ class MamookSession(object):
             self.received = self.redis.hget(self.key, "received").decode("utf-8")
 
     def store(self):
-        mapping = { "state": self.state, "events" : self.events }
+        mapping = { "state": self.state }
         if self.artist is None:
             self.redis.hdel(self.key, "artist")
         else:
@@ -143,7 +142,8 @@ class MamookSession(object):
             self.redis.hdel(self.key, "received")
         else:
             mapping['received'] = self.received
-        self.redis.hset(self.key, mapping=mapping)
+        for k, v in mapping.items():
+            self.redis.hset(self.key, k, v)
 
     def slot(self, slot):
         if slot == "artists":
@@ -175,10 +175,8 @@ class MamookSession(object):
         return {}
 
     def record_event(self, evt):
-        self.events += 1
-        self.redis.hset(self.key, "events", self.events)
         evt['datetime'] = datetime.datetime.now().ctime()
-        self.redis.set("e-{}-{}".format(self.key, self.events), json.dumps(evt))
+        self.redis.lpush("e-{}".format(self._id), json.dumps(evt))
 
 def decode_dict(d):
     r = {}

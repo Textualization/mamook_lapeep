@@ -18,7 +18,7 @@ SET t-GUIDED              "artist options { 'state': '{{ session.state }}', 'opt
 SET t-COLLECT             "{ 'state': '{{ session.state }}' }"
 SET t-NOW                 "{ 'state': '{{ session.state }}' }"
 SET t-LATER               "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/sample/later.mp4' }"
-SET t-DELIVER             "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/{{item.delivery|safe}}' }"
+SET t-DELIVER             "item { 'state': '{{ session.state }}', 'video' : '{{static|safe}}/{{item.delivery|safe}}' }"
 SET t-END                 "{ 'state': '{{ session.state }}', 'video' : '{{static|safe}}/sample/end.mp4' }"
 
 INFO "########## artists ##########"

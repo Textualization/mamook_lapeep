@@ -28,7 +28,13 @@ function mamook_refresh(){
   }else{
     $("workarea").innerHTML = "MISSING: " + window.mamook_state;
   }
+  {% if ui == 'base' %}
   window.mamook_check();
+  {% else %}
+  if(window.mamook_state != 'END'){
+    window.mamook_check();
+  }
+  {% endif %}
 }
 
 function mamook_retrieve(){
