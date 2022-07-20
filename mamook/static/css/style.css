@@ -6,34 +6,34 @@ body {
 
 #qr_mamook {
     font-family: 'Merriweather', serif;
-    font-size: 128px;
+    font-size: 180px;
     position: absolute;
-    top: 148px;
-    right: 126px;
+    top: 100px;
+    left: 126px;
     color: black;
 }
 
 #qrcode {
     position: absolute;
-    top: 348px;
-    right: 740px;
+    top: 351px;
+    left: 740px;
 }
 
 #qr_letschat {
     font-family: 'Merriweather', serif;
-    font-size: 128px;
+    font-size: 148px;
     position: absolute;
     top: 788px;
-    right: 389px;
+    left: 389px;
     color: #292410;
 }
 
 #qr_scan {
     font-family: 'Merriweather', serif;
-    font-size: 64px;
+    font-size: 52px;
     position: absolute;
     top: 974px;
-    right: 94px;
+    left: 94px;
     color: black;
 }
 

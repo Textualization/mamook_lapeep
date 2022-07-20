@@ -25,6 +25,8 @@ var mamook_handler = {
           text: url + "?nonce=" + code,
           width: 426,
           height: 426,
+          colorDark: "#000000",
+          colorLight: "#ebdcbc",
           correctLevel : QRCode.CorrectLevel.H
       });
   },
