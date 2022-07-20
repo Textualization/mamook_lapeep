@@ -1,0 +1,47 @@
+body {
+ background-image: url("/static/imgs/UI.v3.Background.png");
+ background-color: #cccccc;
+ font-family: 'Merriweather', serif;
+}
+
+#qr_mamook {
+    font-family: 'Merriweather', serif;
+    font-size: 128px;
+    position: absolute;
+    top: 148px;
+    right: 126px;
+    color: black;
+}
+
+#qrcode {
+    position: absolute;
+    top: 348px;
+    right: 740px;
+}
+
+#qr_letschat {
+    font-family: 'Merriweather', serif;
+    font-size: 128px;
+    position: absolute;
+    top: 788px;
+    right: 389px;
+    color: #292410;
+}
+
+#qr_scan {
+    font-family: 'Merriweather', serif;
+    font-size: 64px;
+    position: absolute;
+    top: 974px;
+    right: 94px;
+    color: black;
+}
+
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/static/fonts/Merriweather-Bold.ttf) format('truetype');
+}

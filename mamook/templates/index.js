@@ -10,15 +10,23 @@ var mamook_handler = {
   },
   
   QR : function(payload) {
-    document.getElementById("videoarea").style.display = 'none';
-    document.getElementById("video").pause();
-    var url = "{{ url_for('landing', _external='true') }}";
-    var alternate = "{{ url_for('manual', _external='true') }}";
-    var code = document.cookie.substr(document.cookie.indexOf('=') + 1);
-    document.getElementById("workarea").innerHTML = "<p>Please scan the following QR code from your mobile device to begin:</p>" +
-      "<div id='qrcode'></div>" +
-      "<p>Alternatively, you can go to <a href='" + alternate + "'>" + alternate +"</a> and enter the code " + code + "</p>";
-    new QRCode(document.getElementById("qrcode"), url + "?nonce=" + code);
+      document.getElementById("videoarea").style.display = 'none';
+      document.getElementById("video").pause();
+      var url = "{{ url_for('landing', _external='true') }}";
+      var alternate = "{{ url_for('manual', _external='true') }}";
+      var code = document.cookie.substr(document.cookie.indexOf('=') + 1);
+      document.getElementById("workarea").innerHTML = "" +
+          "<p id='qr_mamook'>MAMOOK LAPEEP!</p>" +
+          "<div id='qrcode'></div>" +
+          "<p id='qr_letschat'>“LET’S CHAT”</p>" +
+          "<p id='qr_scan'>SCAN THE QR CODE ON YOUR PHONE CAMERA TO GET STARTED</p>";
+      console.log("Alternatively, you can go to <a href='" + alternate + "'>" + alternate +"</a> and enter the code " + code);
+      new QRCode(document.getElementById("qrcode"), {
+          text: url + "?nonce=" + code,
+          width: 426,
+          height: 426,
+          correctLevel : QRCode.CorrectLevel.H
+      });
   },
 
   START : function(payload) { this.showvideo(payload); },
